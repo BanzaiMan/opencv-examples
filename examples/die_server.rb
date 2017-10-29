@@ -34,7 +34,7 @@ if $0 == __FILE__
   logger = Logger.new(STDERR)
   logger.level = Logger.const_get(ENV.fetch('LOG_LEVEL', 'WARN').upcase)
 
-  logger.into "state=ready"
+  logger.info "state=ready"
 
   threshold = 0x66
   accuracy  = 1
