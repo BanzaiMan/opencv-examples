@@ -10,13 +10,21 @@ socket_path = ARGV[1] || '/tmp/die.socket'
 
 def bits(pips)
   {
-    1 => 0b00,
-    2 => 0b01,
-    3 => 0b10,
-    4 => 0b11,
-    5 => 0b0,
-    6 => 0b1
+    1 => '00',
+    2 => '01',
+    3 => '10',
+    4 => '11',
+    5 => '0',
+    6 => '1'
   }[pips]
+end
+
+def peel_first(str, offset)
+  if str.length >= offset
+    [str[0,offset], str[offset, str.length - offset]]
+  else
+    [nil, str]
+  end
 end
 
 # Compare 2 files, and draw where changes occurred
@@ -27,6 +35,8 @@ if $0 == __FILE__
 
   CONTOUR_LENGTH_MIN = 60
   CONTOUR_LENGTH_MAX = 150
+
+  buf = ''
 
   serv = UNIXServer.new(socket_path)
   socket = serv.accept
@@ -76,11 +86,15 @@ if $0 == __FILE__
           end
         end while (poly = poly.h_next)
 
-
         contours = contours.h_next
       end
+
       logger.warn "pips=#{pips} last_pips=#{last_pips}"
-      socket.write(bits(pips)) if bits(pips) && last_pips == 0
+      if bits(pips) && last_pips == 0
+        buf << bits(pips)
+        byte, buf = peel_first(buf, 8)
+        socket.write([byte].pack "b8") if byte
+      end
 
       bin_window.show binary
       diff_window.show img_diff
