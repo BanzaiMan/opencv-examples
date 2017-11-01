@@ -89,11 +89,15 @@ if $0 == __FILE__
         contours = contours.h_next
       end
 
-      logger.warn "pips=#{pips} last_pips=#{last_pips}"
+      logger.info "pips=#{pips} last_pips=#{last_pips}"
+
       if bits(pips) && last_pips == 0
         buf << bits(pips)
         byte, buf = peel_first(buf, 8)
-        socket.write([byte].pack "b8") if byte
+        if byte
+          logger.info("byte=#{byte}")
+          socket.write([byte].pack "b8")
+        end
       end
 
       bin_window.show binary
